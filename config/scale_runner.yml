@@ -1,0 +1,16 @@
+---
+shared:
+  self-hosted_test:
+    type: "aws"
+    region: "us-east-1"
+    ami_id: "ami-083654bd07b5da81d"
+    ami_tags: 
+      - "Name:Packer Builder"
+    device_name: "/dev/sdb"
+    volume_size: 8
+    instance_type: "t2.micro" 
+    key_name: "csa-keypair"
+    security_group_ids:
+    - "sg-0e0ff5313bcc54629"
+    subnet_id: "subnet-0e0d2868"
+    profile_name: "Ec2AccessSM"

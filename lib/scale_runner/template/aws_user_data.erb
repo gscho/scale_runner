@@ -1,0 +1,38 @@
+#!/bin/bash
+
+sudo apt-get update
+sudo apt-get install -y jq
+
+sudo useradd actions -m -s /bin/bash
+sudo mkdir -p /home/actions/runner
+
+echo "Downloading latest runner ..."
+
+_LATEST_VERSION_LABEL=$(curl -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')
+_LATEST_VERSION=$(echo ${_LATEST_VERSION_LABEL:1})
+_RUNNER_FILE="actions-runner-linux-x64-${_LATEST_VERSION}.tar.gz"
+_RUNNER_URL="https://github.com/actions/runner/releases/download/${_LATEST_VERSION_LABEL}/${_RUNNER_FILE}"
+
+echo "Downloading ${_LATEST_VERSION_LABEL} for linux ..."
+echo "${_RUNNER_URL}"
+
+curl -O -L ${_RUNNER_URL}
+ls -la *.tar.gz
+
+echo
+echo "Extracting ${_RUNNER_FILE} to /home/actions/runner"
+
+sudo tar xzf "./${_RUNNER_FILE}" -C /home/actions/runner
+
+sudo chown -R actions /home/actions
+cd /home/actions/runner
+
+echo
+echo "Configuring actions-runner  <%= runner_url %>"
+echo "./config.sh --unattended --url <%= runner_url %> --token *** --name <%= runner_name %> --labels <%= runner_labels %>"
+sudo -E -u actions ./config.sh --ephemeral --unattended --url <%= runner_url %> --token <%= runner_token %> --name <%= runner_name %> --labels <%= runner_labels %>
+
+echo
+echo "Configuring as a service ..."
+sudo ./svc.sh install actions
+sudo ./svc.sh start
